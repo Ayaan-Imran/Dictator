@@ -2,7 +2,6 @@ import pyttsx3
 import os
 import css
 import time
-import pyperclip
 
 # Create Engine
 engine = pyttsx3.init()
@@ -13,67 +12,96 @@ def speak(prompt):
     engine.say(prompt)
     engine.runAndWait()
 
+# Asks confirmation
+print(css.color("Welcome to version 2.0", css.C_RED))
+print()
+
+input("Please hit enter when you are done preparing in the Spelling words.txt file: ")
+
 # Load data
-instructions = f"{css.bold('Instructions')}\n1. Please copy the text in your spelling worksheet then hit {css.underline('Enter')}"
-input(instructions)
-input(
-    f"Please paste the text in the file called 'Spelling words.txt' and hit {css.underline('Enter')}")
-spelling_words = open("Spelling words.txt", "r")
-spelling_words = spelling_words.readline()
-spelling_words = spelling_words.split(" ")
+with open("Spelling words.txt", "r") as file:
+    data = file.read().split(",")
+    data = [i.lower() for i in data]
 
-# Clear the screen
-os.system("cls")
+# Creates a dictionary for the words
+score_board = {"score": 0}
 
-# Loop through the words
-question_number = 1
-tracker = [[i, False] for i in spelling_words]
+for i in data:
+    score_board[i] = False
 
-for i in spelling_words:
-    print(f"Question number {question_number}")
-    speak(f"Question {question_number}")
-
-    spelling = f"Spell {i}"
-    speak(spelling)
-
-    guess = input("Enter here (If you want to hear again, type in '(hear again)') and hit enter: ").lower()
-    heard = False
-    if guess == "(hear again)":
-        speak(i)
-        print("MAX TIMES FOR HEARING IS OVER")
-        heard = True
-    
-    if heard:
-        guess = input("Enter here: ").lower()
-
-    if guess == i.lower():
-        tracker[spelling_words.index(i)][1] = True
-    else:
-        guess = input("Wrong! Enter again: ").lower()
-
-        if guess == i.lower():
-            tracker[spelling_words.index(i)][1] = True
-        else:
-            tracker[spelling_words.index(i)].append(guess)
-
-    print("Results will be at the end")
-
-    question_number += 1
-
-    time.sleep(1)
-
+# Asks the words
+for i in data:
+    # Clear the console
     os.system("cls")
 
-# Display marks
-screen = f"{css.bold('Score board')}\n\n"
-for i in tracker:
-    if i[1]:
-        guess_if_right = css.color("Correct", css.GREEN)
+    # Speak the word
+    speak(i)
+
+    # Ask the word
+    guess = input("Enter here. If you want hear again, type [hear again]: ")
+    while guess == "hear again":
+        speak(i)
+
+        guess = input("Enter here. If you want hear again, type [hear again]: ")
+
+    # Checks if the word was enteed right
+    if guess.lower() == i:
+        score_board[i] = True
+
+    # Let the user know that they did something
+    print("The result will be at the end")
+
+    # Sleep the program for 2 seconds
+    time.sleep(2)
+
+
+# Gets the score
+score = 0
+for i in data:
+    if score_board[i]:
+        score += 1
+
+score_board["score"] = score
+
+# Calculates percentage
+total_words = len(data)
+percentage = (score / total_words) * 100
+
+# Prints the end result
+title = css.underline(css.color("The score board\n", css.C_YELLOW))
+
+scores_display = "" # This is where the final results where be kept in.
+number = 0 # This is the question number
+word_for_appending_in_display = "" # This is going to be the original word
+answer_for_appending_in_display = "" # This is going to be the user's guess
+for i in data:
+    number += 1
+
+    answer = score_board[i] # Will return true or false
+
+    # Updating appending variables
+    word_for_appending_in_display = css.bold(css.color(i, css.C_BLUE))
+
+    if answer == False:
+        answer_for_appending_in_display = css.bold(css.color(answer, css.RED))
+
     else:
-        guess_if_right = f'{css.color("Wrong", css.RED)}. {css.color(f"You entered {i[2]}", css.CYAN)}'
+        answer_for_appending_in_display = css.bold(css.color(answer, css.GREEN))
 
-    number = css.color('Number {}'.format(
-        spelling_words.index(i[0])+1), css.YELLOW)
-    screen += f"{number} ({i[0]}): {guess_if_right}\n"
+    # Append it to scores_display vairbale
+    scores_display += f"{number}. {answer_for_appending_in_display}: {word_for_appending_in_display}\n" 
 
-print(screen)
+    # Reset all variables
+    word_for_appending_in_display = ""
+    answer_for_appending_in_display = ""
+    correct_answer_for_appending_in_display = ""
+
+statistics_title = css.underline(css.color("Statistics", css.C_YELLOW))
+statistics_score = css.color(f"Score: {score}/{total_words}", css.C_BLUE)
+statistics_percentage = css.color(f"Percentage: {percentage}%", css.C_BLUE)
+statistics_total = f"\n{statistics_title}\n{statistics_score}\n{statistics_percentage}\n"
+
+score_board_display = f"{title}{scores_display}{statistics_total}"
+
+# Print the board
+print(score_board_display)
