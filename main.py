@@ -1,7 +1,7 @@
 import pyttsx3
 import os
-import css
 import time
+import termcolor
 
 # Create Engine
 engine = pyttsx3.init()
@@ -13,11 +13,23 @@ def speak(prompt):
     engine.runAndWait()
 
 # Asks confirmation
-print(css.color("Welcome to version 2.0", css.C_RED))
-print()
+symbols = ["/", "―", "\\", "―"]
+index = 0
 
-input("Please hit enter when you are done preparing in the Spelling words.txt file: ")
+try:
+    while True:
+        print(f"\rPlease hit {termcolor.colored('CTRL + C', on_color='on_grey')} when you have added your spellings in the 'Spelling words.txt' file. {symbols[index]}", end="\r")
 
+        if index == 3:
+            index = 0
+        else:
+            index += 1
+            
+        time.sleep(0.3)
+        
+except KeyboardInterrupt:
+    print("Something")     
+    
 # Load data
 with open("Spelling words.txt", "r") as file:
     data = file.read().split(",")
