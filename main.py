@@ -28,7 +28,9 @@ try:
         time.sleep(0.3)
         
 except KeyboardInterrupt:
-    print("Something")     
+    print("Proceeding...")
+    time.sleep(1)
+    os.system("cls")
     
 # Load data
 with open("Spelling words.txt", "r") as file:
