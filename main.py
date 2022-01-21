@@ -28,6 +28,7 @@ try:
         time.sleep(0.3)
         
 except KeyboardInterrupt:
+    os.system("cls")
     print("Proceeding...")
     time.sleep(1)
     os.system("cls")
@@ -38,10 +39,13 @@ with open("Spelling words.txt", "r") as file:
     data = [i.lower() for i in data]
 
 # Creates a dictionary for the words
-score_board = {"score": 0}
+score_board = {}
 
 for i in data:
     score_board[i] = False
+
+# Create a dictionary for the user guesses
+user_guesses = {}
 
 # Asks the words
 for i in data:
@@ -52,21 +56,32 @@ for i in data:
     speak(i)
 
     # Ask the word
-    guess = input("Enter here. If you want hear again, type [hear again]: ")
-    while guess == "hear again":
-        speak(i)
+    while True:
+        try:
+            os.system("cls")
+            guess = input(f"Enter here. If you want hear again, {termcolor.colored('on your keyboard:', 'magenta')} {termcolor.colored('CTRL+C', on_color='on_grey')}: ")
+            break
+            
+        except KeyboardInterrupt:
+            os.system("cls")
+            termcolor.cprint("Listen carefully...", "blue")
+            speak(i)
+            continue
 
-        guess = input("Enter here. If you want hear again, type [hear again]: ")
-
-    # Checks if the word was enteed right
+    # Checks if the word was entered right
     if guess.lower() == i:
         score_board[i] = True
+        
+    # Add user guess
+    user_guesses[i] = guess
 
     # Let the user know that they did something
-    print("The result will be at the end")
-
-    # Sleep the program for 2 seconds
-    time.sleep(2)
+    sentence = termcolor.colored("The results will be at the end", "blue")
+    loading = termcolor.colored("", "blue")
+    while loading == "....":
+        print("\r" + sentence + loading, end="\r")
+        loading += "."
+        time.sleep(.5)
 
 
 # Gets the score
@@ -75,47 +90,31 @@ for i in data:
     if score_board[i]:
         score += 1
 
-score_board["score"] = score
-
 # Calculates percentage
 total_words = len(data)
 percentage = (score / total_words) * 100
 
-# Prints the end result
-title = css.underline(css.color("The score board\n", css.C_YELLOW))
+# Print the end result's title
+os.system("cls") # Clear the screen
+termcolor.cprint("The score board", "yellow") # Prints the title
+print() # Print an extra line
 
-scores_display = "" # This is where the final results where be kept in.
 number = 0 # This is the question number
-word_for_appending_in_display = "" # This is going to be the original word
-answer_for_appending_in_display = "" # This is going to be the user's guess
-for i in data:
-    number += 1
 
-    answer = score_board[i] # Will return true or false
+# Print the scoreboard
+for original_word in data:
+    number += 1 # Add new question number
+    users_guess_bool = score_board[original_word] # Returns True or False according to if the user gets the word right or wrong
+    users_guess = user_guesses[original_word]
+        
+    if users_guess_bool == False: # If user gets the word wrong then it will be displayed in red colour
+        colour = "red"
+    else: # If user gets the word right then it will be displayed in green
+        colour = "green"
 
-    # Updating appending variables
-    word_for_appending_in_display = css.bold(css.color(i, css.C_BLUE))
+    print(f"{number}. {termcolor.colored(original_word, 'blue')} {termcolor.colored('⟶  {} ⟶  '.format(users_guess_bool), colour)} {users_guess}")
 
-    if answer == False:
-        answer_for_appending_in_display = css.bold(css.color(answer, css.RED))
-
-    else:
-        answer_for_appending_in_display = css.bold(css.color(answer, css.GREEN))
-
-    # Append it to scores_display vairbale
-    scores_display += f"{number}. {answer_for_appending_in_display}: {word_for_appending_in_display}\n" 
-
-    # Reset all variables
-    word_for_appending_in_display = ""
-    answer_for_appending_in_display = ""
-    correct_answer_for_appending_in_display = ""
-
-statistics_title = css.underline(css.color("Statistics", css.C_YELLOW))
-statistics_score = css.color(f"Score: {score}/{total_words}", css.C_BLUE)
-statistics_percentage = css.color(f"Percentage: {percentage}%", css.C_BLUE)
-statistics_total = f"\n{statistics_title}\n{statistics_score}\n{statistics_percentage}\n"
-
-score_board_display = f"{title}{scores_display}{statistics_total}"
-
-# Print the board
-print(score_board_display)
+# Statistics title
+termcolor.cprint("\nStatistics\n", "yellow") # Prints the statistics title
+print(f"{termcolor.colored('Score', 'magenta')}     : {score}/10")
+print(f"{termcolor.colored('Percentage', 'magenta')}: {percentage}%")
