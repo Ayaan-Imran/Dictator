@@ -7,7 +7,7 @@ import termcolor
 engine = pyttsx3.init()
 engine.setProperty("rate", 125)
 
-# Create speak function
+# Functions
 def speak(prompt):
     engine.say(prompt)
     engine.runAndWait()
@@ -34,9 +34,11 @@ except KeyboardInterrupt:
     os.system("cls")
     
 # Load data
+total_words = 0
 with open("Spelling words.txt", "r") as file:
-    data = file.read().split(",")
-    data = [i.lower() for i in data]
+    data = file.readlines()
+    data = [line.lower().strip("\n\t") for line in data]
+    total_words = len(data)
 
 # Creates a dictionary for the words
 score_board = {}
@@ -72,14 +74,14 @@ for i in data:
     if guess.lower() == i:
         score_board[i] = True
         
-    # Add user guess
+    # Add user's guess
     user_guesses[i] = guess
 
     # Let the user know that they did something
     sentence = termcolor.colored("The results will be at the end", "blue")
-    loading = termcolor.colored("", "blue")
-    while loading == "....":
-        print("\r" + sentence + loading, end="\r")
+    loading = ""
+    while loading != "....":
+        print("\r" + sentence + " " + termcolor.colored(loading, "blue"), end="\r")
         loading += "."
         time.sleep(.5)
 
@@ -87,11 +89,10 @@ for i in data:
 # Gets the score
 score = 0
 for i in data:
-    if score_board[i]:
+    if score_board[i] == True:
         score += 1
 
 # Calculates percentage
-total_words = len(data)
 percentage = (score / total_words) * 100
 
 # Print the end result's title
@@ -116,5 +117,5 @@ for original_word in data:
 
 # Statistics title
 termcolor.cprint("\nStatistics\n", "yellow") # Prints the statistics title
-print(f"{termcolor.colored('Score', 'magenta')}     : {score}/10")
+print(f"{termcolor.colored('Score', 'magenta')}     : {score}/{total_words}")
 print(f"{termcolor.colored('Percentage', 'magenta')}: {percentage}%")
