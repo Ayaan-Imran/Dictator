@@ -3,6 +3,11 @@ import os
 import time
 import termcolor
 
+# Formatting variables
+positive = termcolor.colored('[', 'cyan') + termcolor.colored('+', 'green') + termcolor.colored(']', 'cyan') + ' '
+neutral = termcolor.colored('[', 'cyan') + termcolor.colored('-', 'yellow') + termcolor.colored(']', 'cyan') + ' '
+negative = termcolor.colored('[', 'cyan') + termcolor.colored('!', 'red') + termcolor.colored(']', 'cyan') + ' '
+
 # Create Engine
 engine = pyttsx3.init()
 engine.setProperty("rate", 125)
@@ -18,7 +23,7 @@ index = 0
 
 try:
     while True:
-        print(f"\rPlease hit {termcolor.colored('CTRL + C', on_color='on_grey')} when you have added your spellings in the 'Spelling words.txt' file. {symbols[index]}", end="\r")
+        print(f"\r{neutral}Please hit {termcolor.colored('CTRL + C', on_color='on_grey')} when you have added your spellings in the 'Spelling words.txt' file. {symbols[index]}", end="\r")
 
         if index == 3:
             index = 0
@@ -61,7 +66,7 @@ for i in data:
     while True:
         try:
             os.system("cls")
-            guess = input(f"Enter here. If you want hear again, {termcolor.colored('on your keyboard:', 'magenta')} {termcolor.colored('CTRL+C', on_color='on_grey')}: ")
+            guess = input(f"{neutral}Enter here. If you want hear again, {termcolor.colored('on your keyboard:', 'magenta')} {termcolor.colored('CTRL+C', on_color='on_grey')}: ")
             break
             
         except KeyboardInterrupt:
@@ -86,6 +91,61 @@ for i in data:
         time.sleep(.5)
 
 
+# Editing screen
+os.system("cls")
+termcolor.cprint("Editing screen", "blue", attrs=["underline"])
+print()
+
+index = 0
+for word in data:
+    index += 1
+    users_guess = user_guesses[word]
+    
+    print(str(index) + ". " + users_guess)
+print()
+
+edit_confirmation = input(neutral + "Do you wish to edit any of your answers? [Y/n]: ")
+
+if edit_confirmation.lower() == "y":
+    print()
+    
+    while True:
+        index = input(neutral + f"Enter the index of the word you want to edit from the list above {termcolor.colored('[ENTER] for exiting', 'grey')}: ")
+        if index == "":
+            print(positive + "Proceeding onto the score sheet...")
+            time.sleep(1)
+            break
+        
+        guess = input(neutral + f"Enter the re-edited version of that word {termcolor.colored('[ENTER] for exiting', 'grey')}: ")
+        if guess == "":
+            print(positive + "Proceeding onto the score sheet...")
+            time.sleep(1)
+            break
+        
+        # Seperate key from value in the user_guesses dictionary
+        words = []
+        guesses = []
+        for key, value in user_guesses.items():
+            words.append(key)
+            guesses.append(value)
+
+        chosen_word = words[int(index) - 1]
+        user_guesses[chosen_word] = guess
+        print(positive + "Sucessfully changed the word")
+        print()
+    
+    # Update the score sheet
+    for key, value in user_guesses.items():
+        if key == value:
+            score_board[key] = True
+        else:
+            score_board[key] = False
+
+else:
+    print(positive + "Proceeding onto the score sheet...")
+    time.sleep(1)
+    
+
 # Gets the score
 score = 0
 for i in data:
@@ -97,7 +157,7 @@ percentage = (score / total_words) * 100
 
 # Print the end result's title
 os.system("cls") # Clear the screen
-termcolor.cprint("The score board", "yellow") # Prints the title
+termcolor.cprint("The score sheet", "blue", attrs=["underline"]) # Prints the title
 print() # Print an extra line
 
 number = 0 # This is the question number
